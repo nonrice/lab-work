@@ -102,6 +102,7 @@ class App():
 
 	def	run(self, in_path, out_path):
 		self.img = cv.imread(in_path)
+		
 		self.img2 =	self.img.copy()								  #	a copy of original image
 		self.mask =	np.zeros(self.img.shape[:2], dtype = np.uint8) # mask initialized to PR_BG
 		self.output	= np.zeros(self.img.shape, np.uint8)		   # output	image to be	shown
