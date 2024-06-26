@@ -1,7 +1,6 @@
 from matplotlib import pyplot as plt
 import numpy as np
 
-def centroid()
 
 img_path = "./data/maskoutput.png"
 img = plt.imread(img_path).astype(bool)

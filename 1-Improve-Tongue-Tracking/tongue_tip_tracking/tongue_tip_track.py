@@ -13,30 +13,45 @@ def is_boundary(img, p):
                 return True
     return False
 
-# load image
-img_path = "./data/maskoutput.png"
-img = plt.imread(img_path).astype(bool)
+def find_tongue_tip(img):
+    # get c1 as COM of the whole mask
+    mask = np.column_stack(np.where(img > 0)[::-1])
+    c1 = np.mean(mask, axis=0)
 
-# get c1 as COM of the whole mask
-mask = np.column_stack(np.where(img > 0)[::-1])
-c1 = np.mean(mask, axis=0)
+    # finding 75th percentile distance from c1
+    dists = np.linalg.norm(c1 - mask, axis=1)
+    dist75 = int(sorted(dists)[int(0.75 * len(dists))])
 
-# finding 75th percentile distance from c1
-dists = np.linalg.norm(c1 - mask, axis=1)
-dist75 = int(sorted(dists)[int(0.75 * len(dists))])
+    # candidate set 1 as pixels farther than dist75 and within 45 deg of v1, v1 as chosen constant
+    v1 = np.array([-1, 1])
+    cand1 = list(filter(lambda p : np.linalg.norm(v1 - (p-c1)) > dist75 and angle_between(p-c1, v1) < 45, mask))
 
-# candidate set 1 as pixels farther than dist75 and within 45 deg of v1, v1 as chosen constant
-v1 = np.array([-1, 1])
-cand1 = list(filter(lambda p : np.linalg.norm(v1 - (p-c1)) > dist75 and angle_between(p-c1, v1) < 45, mask))
+    # candidate set 2 as pixels within 15 deg of v2 and on mask boundary, where v2 is c2-c1 with c2 as COM of cand1
+    c2 = np.mean(cand1, axis=0) 
+    v2 = c2 - c1
+    cand2 = list(filter(lambda p : angle_between(p-c1, v2) < 15 and is_boundary(img, p), cand1))
 
-# candidate set 2 as pixels within 15 deg of v2 and on mask boundary, where v2 is c2-c1 with c2 as COM of cand1
-c2 = np.mean(cand1, axis=0) 
-v2 = c2 - c1
-cand2 = list(filter(lambda p : angle_between(p-c1, v2) < 15 and is_boundary(img, p), cand1))
+    # tongue tip is COM of cand2
+    return np.mean(cand2, axis=0) 
 
-# tongue tip is COM of cand2
-tip = np.mean(cand2, axis=0) 
+def load_bool_img(path):
+    img = plt.imread(path).astype(bool)
+    return img
 
-plt.imshow(img, cmap="gray")
-plt.scatter(x = tip[0], y = tip[1], c = "r", s = 10);
-plt.show()
+def plot_tip(img, tip):
+    plt.imshow(img, cmap="gray")
+    plt.scatter(x = tip[0], y = tip[1], c = "r", s = 10);
+    plt.show()
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Find tongue tip from binary mask.")
+    parser.add_argument("--in", required=True, help="Input image of binary mask")
+    parser.add_argument("--show", action="store_true", help="Show the image with the tongue tip")
+    args = parser.parse_args()
+    img = load_bool_img(args)
+    tip = find_tongue_tip(img)
+    if args.show:
+        plot_tip(img, tip)
+    else:
+        print(tip)

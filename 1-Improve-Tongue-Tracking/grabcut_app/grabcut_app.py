@@ -176,7 +176,6 @@ class App():
 if __name__	== '__main__':
 	parser = argparse.ArgumentParser(description='Process some images.')
 
-	# Add the arguments
 	parser.add_argument('--in', dest='in_path', required=True, help='Input file path')
 	parser.add_argument('--out', dest='out_path', required=True, help='Output file path')
 	parser.add_argument('--dir', action='store_true', help='Process directories')
