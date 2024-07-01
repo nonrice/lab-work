@@ -1,9 +1,6 @@
 import json
 
 def json_to_csv(jaw_json_path, jaw_csv_path):
-	jaw_json_path = "./data/jaw_bottom_1.json"
-	jaw_csv_path = "./output.csv"
-
 	with open(jaw_json_path) as jaw_json_file:
 		jaw_json = json.load(jaw_json_file)
 
