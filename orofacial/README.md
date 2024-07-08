@@ -1,3 +1,3 @@
 # orofacial
 
-Collection utility scripts written for mice orofacial analysis.
+Collection of utility scripts written for mice orofacial analysis.
