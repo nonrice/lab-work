@@ -16,8 +16,8 @@ def plot_frame(archive, frame_no, img_height, img_width):
     return img
 
 def plot_frame_bool(archive, frame_no, img_height, img_width):
-    img = np.zeros((img_height, img_width), dtype=np.uint8)
-    img[archive.heights[frame_no]-1, archive.widths[frame_no]-1] = 1
+    img = np.zeros((img_height, img_width), dtype=np.bool_)
+    img[archive.heights[frame_no], archive.widths[frame_no]] = 1
     return img
 
 def keep_largest_cc(img):
