@@ -64,7 +64,25 @@ def find_tongue_tip(img, init_vec):
 
     if len(cand2) == 0:
         return c2
-    return centroid(cand2)  
+    return centroid(cand2)
+
+@njit("float32[:](bool_[:, :], float32[:])", parallel=True)
+def find_tongue_tip_no_dist(img, init_vec):
+    mask = np.column_stack(np.where(img == 1)[::-1]).astype(np.int32)
+    c1 = centroid(mask)
+
+    v1 = init_vec 
+    cand1 = mask[np.where(v_angle(mask - c1, v1) < 45)]
+
+    if len(cand1) == 0:
+        return c1
+    c2 = centroid(cand1) 
+    v2 = c2 - c1
+    cand2 = cand1[np.where(np.logical_and(v_angle(cand1-c1, v2) < 15, v_is_boundary(img, cand1)))]
+
+    if len(cand2) == 0:
+        return c2
+    return centroid(cand2)
 
 def load_bool_img(path):
     img = plt.imread(path)
@@ -85,7 +103,7 @@ if __name__ == "__main__":
     parser.add_argument("--show", action="store_true", help="Show the image with the tongue tip")
     args = parser.parse_args()
     img = load_bool_img(args.in_path)
-    tip = find_tongue_tip(img, np.array([-1, 1], dtype=np.float32))
+    tip = find_tongue_tip(img, np.array([-1, 0], dtype=np.float32))
     if args.show:
         plot_tip(img, tip)
     else:
