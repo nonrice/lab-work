@@ -7,6 +7,11 @@
 
 #include "GrabCutTool.hpp"
 
+/**
+ * @brief Construct a new GrabCutTool:: GrabCutTool object
+ * 
+ * @param path Path to the image
+ */
 GrabCutTool::GrabCutTool(std::string path){
     _img = cv::imread(path);
     if (_img.empty()){
@@ -15,6 +20,9 @@ GrabCutTool::GrabCutTool(std::string path){
     }
 }
 
+/**
+ * @brief Run the GrabCutTool with OpenCV highgui
+ */
 void GrabCutTool::runHighgui(){
     cv::namedWindow("Mask Preview", cv::WINDOW_AUTOSIZE);
     cv::namedWindow("Editor", cv::WINDOW_AUTOSIZE);
@@ -64,10 +72,27 @@ void GrabCutTool::runHighgui(){
     cv::destroyAllWindows();
 }
 
+/**
+ * @brief Wrapper function for mouse event handler to supply to OpenCV
+ * 
+ * @param event Mouse event
+ * @param x Mouse x coordinate
+ * @param y Mouse y coordinate
+ * @param flags Mouse flags
+ * @param params Pointer to GrabCutTool object
+ */
 void GrabCutTool::_mouseHandlerWrapper(int event, int x, int y, int flags, void* params){
     reinterpret_cast<GrabCutTool*>(params)->_mouseHandler(event, x, y, flags);
 }
 
+/**
+ * @brief Mouse event handler
+ * 
+ * @param event Mouse event
+ * @param x Mouse x coordinate
+ * @param y Mouse y coordinate
+ * @param flags Mouse flags
+ */
 void GrabCutTool::_mouseHandler(int event, int x, int y, int flags){
     if (event == cv::EVENT_LBUTTONDOWN){
         mouseDown(x, y);
@@ -78,6 +103,12 @@ void GrabCutTool::_mouseHandler(int event, int x, int y, int flags){
     }
 }
 
+/**
+ * @brief Mouse down event handler
+ * 
+ * @param x Mouse x coordinate
+ * @param y Mouse y coordinate
+ */
 void GrabCutTool::mouseDown(int x, int y){
     _drawing = true;
     if (_rect_stage){
@@ -87,6 +118,13 @@ void GrabCutTool::mouseDown(int x, int y){
         cv::circle(_mask, _mouse_prev, _brush_thickness, _color, -1);
     }
 }
+
+/**
+ * @brief Mouse move event handler
+ * 
+ * @param x Mouse x coordinate
+ * @param y Mouse y coordinate
+ */
 void GrabCutTool::mouseMove(int x, int y){
     _mouse_cur = cv::Point(x, y);
     if (_drawing){
@@ -100,6 +138,12 @@ void GrabCutTool::mouseMove(int x, int y){
     }
 }
 
+/**
+ * @brief Mouse up event handler
+ * 
+ * @param x Mouse x coordinate
+ * @param y Mouse y coordinate
+ */
 void GrabCutTool::mouseUp(int x, int y){
     _drawing = false;
     if (_rect_stage){
@@ -107,22 +151,41 @@ void GrabCutTool::mouseUp(int x, int y){
     }
 }
 
+/**
+ * @brief Set the color for painting
+ * 
+ * @param color Color to paint with
+ */
 void GrabCutTool::setColor(uint8_t color){
     _color = color;
 }
 
+/**
+ * @brief Set the brush thickness
+ * 
+ * @param thickness Brush thickness
+ */
 void GrabCutTool::setBrushThickness(int thickness){
     _brush_thickness = thickness;
 }
 
+/**
+ * @brief Increase the brush thickness
+ */
 void GrabCutTool::increaseBrushThickness(){
     _brush_thickness++;
 }
 
+/**
+ * @brief Decrease the brush thickness, minimum 1
+ */
 void GrabCutTool::decreaseBrushThickness(){
     _brush_thickness = std::max(1, _brush_thickness-1);
 }
 
+/**
+ * @brief Run a GrabCut iteration
+ */
 void GrabCutTool::grabcutIter(){
     if (_rect_stage){
         std::cout << "Error: Please select a region of interest\n";
@@ -139,6 +202,11 @@ void GrabCutTool::grabcutIter(){
     }
 }
 
+/**
+ * @brief Paint the outline of the brush
+ * 
+ * @param img Image to paint on
+ */
 void GrabCutTool::_brushOutline(cv::Mat& img){
     for (int y = std::max(_mouse_cur.y - _brush_thickness, 0); y < std::min(_mouse_cur.y + _brush_thickness, img.rows); ++y) {
         for (int x = std::max(_mouse_cur.x - _brush_thickness, 0); x < std::min(_mouse_cur.x + _brush_thickness, img.cols); ++x) {
@@ -150,6 +218,11 @@ void GrabCutTool::_brushOutline(cv::Mat& img){
     }
 }
 
+/**
+ * @brief Get the display image with rectangle and brush outline
+ * 
+ * @return cv::Mat Image with rectangle and brush outline
+ */
 cv::Mat GrabCutTool::getImgDisp(){
     cv::Mat img_disp = _img.clone();
 
@@ -165,6 +238,11 @@ cv::Mat GrabCutTool::getImgDisp(){
     return img_disp;
 }
 
+/**
+ * @brief Get the mask display as mask multiplied with input image
+ * 
+ * @return cv::Mat Mask with image
+ */
 cv::Mat GrabCutTool::getMaskDisp(){
     // Show foreground mask multiplied with image
     cv::Mat mask_disp = cv::Mat::zeros(_img.size(), CV_8UC3);
@@ -181,6 +259,11 @@ cv::Mat GrabCutTool::getMaskDisp(){
     return mask_disp;
 }
 
+/**
+ * @brief Get the raw mask contents
+ * 
+ * @return cv::Mat Mask
+ */
 cv::Mat GrabCutTool::getMask(){
     return _mask;
 }

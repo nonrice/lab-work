@@ -1,6 +1,16 @@
 import json
 
 def json_to_csv(jaw_json_path, jaw_csv_path):
+    """
+    Convert jaw tracking data from JSON to CSV.
+    
+    Parameters:
+    jaw_json_path (str): The path to the input JSON file.
+    jaw_csv_path (str): The path to the output CSV file.
+
+    Returns:
+    None
+    """
     with open(jaw_json_path) as jaw_json_file:
         jaw_json = json.load(jaw_json_file)
 
